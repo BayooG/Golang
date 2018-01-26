@@ -1,0 +1,298 @@
+/**
+ * JavaCC template file created by SF JavaCC plugin 1.5.28+ wizard for JavaCC 1.5.0+
+ *///options
+//{
+//  static = true;
+//}
+PARSER_BEGIN(Go)package golang;
+
+public class Go{  public static void main(String args []) throws ParseException  {    Go parser = new Go(System.in);    while (true)    {      System.out.println("Reading from standard input...");      System.out.print("Enter enter some Golang :");      try      {        switch (Go.one_line())        {          case 0 :           System.out.println("OK.");          break;          default :           break;        }      }      catch (Exception e)      {        System.out.println("NOK.");        System.out.println(e.getMessage());        Go.ReInit(System.in);      }      catch (Error e)      {        System.out.println("Oops.");        System.out.println(e.getMessage());        break;      }    }  }}PARSER_END(Go)SKIP : {
+ 
+|  "\t"
+|  "\n"
+|  "\r"
+|  <"//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+|  <"/*" (~["*"])* "*" ("*" | ~["*","/"] (~["*"])* "*")* "/">
+
+}
+
+TOKEN : {
+ <INTEGER_LITERAL: <DECIMAL_LITERAL> (["l","L"])? | <HEX_LITERAL> (["l","L"])? | <OCTAL_LITERAL> (["l","L"])?>
+|  <#DECIMAL_LITERAL: ["1"-"9"] (["0"-"9"])*>
+|  <#HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+>
+|  <#OCTAL_LITERAL: "0" (["0"-"7"])*>
+|  <FLOATING_POINT_LITERAL: (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["f","F","d","D"])? | "." (["0"-"9"])+ (<EXPONENT>)? (["f","F","d","D"])? | (["0"-"9"])+ <EXPONENT> (["f","F","d","D"])? | (["0"-"9"])+ (<EXPONENT>)? ["f","F","d","D"]>
+|  <#EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+>
+|  <CHARACTER_LITERAL: "\'" (~["\'","\\","\n","\r"] | "\\" (["n","t","b","r","f","\\","\'","\""] | ["0"-"7"] (["0"-"7"])? | ["0"-"3"] ["0"-"7"] ["0"-"7"])) "\'">
+|  <STRING_LITERAL: "\"" ( ~["\"","\\","\n","\r"] | "\\" ( ["n","t","b","r","f","\\","\'","\""] | ["0"-"7"] (["0"-"7"])?  | ["0"-"3"] ["0"-"7"] ["0"-"7"] | ( ["\n","\r"] | "\r\n")))* "\"">
+}
+
+
+
+TOKEN : /* OPERATORS */
+{
+  < PLUS : "+" >
+| < MINUS : "-" >
+| < MULTIPLY : "*" >
+| < DIVIDE : "/" >
+}
+
+TOKEN :
+{
+  < CONSTANT : (< DIGIT >)+ >
+| < SEMICOLON: ";" >
+| < COLON: ":" >
+| < RB :"}" >
+| < LB :"{" >
+| < RP :")" >
+| < LP :"(" >
+| < EQL:"=" >
+| < COMMA:"," >
+
+}
+
+TOKEN : {
+  <FLOAT: "float"> 
+| <VOID: "void"> 
+| <INT: "int"> 
+| <CHAR: "char"> 
+| <VAR: "var">
+| < BOOL :"bool" >
+| <STRING: "string">
+| < TRUE :"true">
+| < FALSE :"false">
+}
+
+TOKEN : {
+	<CONTINUE: "continue"> |
+	<SWITCH: "switch"> |
+	<RETURN: "return"> |
+	<STRUCT: "struct"> |
+	<STATIC: "static"> |
+	<FUNC: "func" >  |
+	<BREAK: "break"> |
+	<CONST: "const"> |
+	<DFLT: "default">|
+	<ELSE: "else"> |
+	<CASE: "case"> |
+	<GOTO: "goto"> |
+	<FOR: "for"> |
+	<TYPE:"type">|
+	<IF: "if"> |
+	<DO: "do"> |
+	< EOF :"eof" >
+}
+
+TOKEN : {
+ <IDENTIFIER: <LETTER> (<LETTER> | <DIGIT>)*>
+|  <#LETTER: ["$","A"-"Z","_","a"-"z"]>
+|  <#DIGIT: ["0"-"9"]>
+}
+
+TOKEN: {
+  < AND: "&&" >
+  }
+int one_line() :{}{ Statements()  {
+	return 0;
+ }}void sum() :{}{  term()  (    (      < PLUS >    | < MINUS >    )    term()  )*}void term() :{}{  unary()  (    (      < MULTIPLY >    | < DIVIDE >    )    unary()  )*}void unary() :{}{  < MINUS > element()| element()} void element() :{}{  < CONSTANT >| "(" sum() ")"}
+
+
+void DeclarationStatement() :
+{}
+{
+   (     LOOKAHEAD(4) < VAR > < INT >    < IDENTIFIER >  Assignment() < INTEGER_LITERAL >
+ | LOOKAHEAD(4) < VAR > < FLOAT >  < IDENTIFIER >  Assignment() < FLOATING_POINT_LITERAL >
+ | LOOKAHEAD(4) < VAR > < STRING > < IDENTIFIER >  Assignment() < STRING_LITERAL >
+ | LOOKAHEAD(4) < VAR > < CHAR >   < IDENTIFIER >  Assignment() < CHARACTER_LITERAL >
+ | < VAR > type() <IDENTIFIER >
+) <SEMICOLON >
+}
+
+void type():
+{}
+{
+  < INT >
+| < FLOAT >
+| < STRING >
+| < CHAR >
+| < BOOL >
+
+}
+
+void Assignment() : {}
+{
+	( "=" )
+}
+
+void AssignmentOperator() :{ }
+{
+  ( "=" | "*=" | "/=" | "%=" | "+=" | "-=" )
+}
+
+void OneOperandOperator() : { }
+{
+  ( "++"|"--")    
+}
+
+void IterationStatement() : {}
+{
+   < FOR > (LOOKAHEAD(2) Condition() |LOOKAHEAD(2) (SimpleStatement())? <SEMICOLON > (Condition())?    <SEMICOLON >(InCrement())? ) Block()      
+}
+
+void SimpleStatement(): { }
+{
+  < IDENTIFIER > <COLON > <EQL > <INTEGER_LITERAL >
+}
+
+void ConditionalStatement() : {}
+{
+  ( < IF >  (Condition())*  Block()
+  ) (< ELSE > (ConditionalStatement()| Block()))?    
+}
+
+void Condition():{}
+{
+  (    Operand() RelationOperations() Operand()
+    )(<AND >)?
+}
+
+void RelationOperations():{}
+{
+  ( "<" | ">" | "<=" | ">="  | "==" | "!=" )
+}
+
+void Block():{}
+{
+  < LB > (Statement())*    < RB >
+  
+}
+
+
+void  AssignmentStatement(): { }
+{
+  (    < IDENTIFIER > AssignmentOperator() Operand() <SEMICOLON >
+  ) 
+}
+void InCrement() :{ }
+{
+  < IDENTIFIER > OneOperandOperator() <SEMICOLON >
+}
+
+void Operand(): { }
+{
+  < IDENTIFIER > | < CHARACTER_LITERAL >|<INTEGER_LITERAL >|<FLOATING_POINT_LITERAL >|<STRING_LITERAL > | <TRUE >|< FALSE >
+
+}
+
+void FunctionDeclaration() : { }
+{
+  < FUNC > <IDENTIFIER > < LP > (Parameter())* < RP >  ReturnType() FunctionBody()
+  
+}
+
+void ReturnType(): { }
+{
+  (
+    < LP > (Parameter())+   < RP >
+    )
+  | (type())?
+}
+
+void FunctionBody(): { }
+{
+  < LB >
+  (Statement())*
+
+  ReturnStatement()
+  < RB >
+}
+
+void ReturnStatement(): { }
+{
+  < RETURN > (Operand())?
+}
+
+void Parameter (): { }
+{
+  (< COMMA >)?(< IDENTIFIER >)? type()
+}
+void function(): { }
+{
+  <IDENTIFIER > <LP >(functionParam())*<RP >
+}
+
+void functionParam() : { }
+{
+  (< IDENTIFIER > |<COMMA >)
+}
+
+void SwitchStatement(): { }
+{
+  < SWITCH > (SwitchExpression())?  SwitchBody()
+}
+
+void SwitchExpression(): { }
+{
+  LOOKAHEAD(2)< IDENTIFIER >
+| (< IDENTIFIER > <COLON > <EQL > function())
+
+}
+
+void SwitchBody(): { }
+{
+< LB >  (    (      < CASE > (Case())* < COLON > Statement()
+    )
+  )*
+  (
+    < DFLT > <COLON > Statement()  )?
+ < RB >
+}
+
+void Case(): { }
+{
+    (Operand() | < COMMA >) 
+}
+
+void StructDec(): { }
+{
+  < STRUCT > < IDENTIFIER > < LB >  < RB >
+}
+
+
+void inStruct() : { }
+{
+  FunctionDeclaration()
+| 
+  
+}
+void inDec() { }
+{
+  
+}
+
+void funCall : { }
+
+{
+  < IDENTIFIER >  <LP > (Parameter() )* < RP >
+}
+void Statement():{}
+{
+  DeclarationStatement()
+|  StructDec()
+| funCall()
+| ConditionalStatement()
+| IterationStatement()
+|LOOKAHEAD(2) AssignmentStatement()
+| SwitchStatement()
+|LOOKAHEAD(2) InCrement()
+
+void Statements(): { }
+{
+  (    Statement()
+  )+
+
+}
+
+   
+}
+
