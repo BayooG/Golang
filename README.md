@@ -1,7 +1,7 @@
 # Golang
 Damascus University 2017
 Compiler Parser Assignment 
-Copyrights to M.Obay Daba (BayooG)
+(BayooG)
 
 ______________________________________________
 A look  alike Golang  Parser  Using JavaCC 5.0 
